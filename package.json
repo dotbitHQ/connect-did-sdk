@@ -1,0 +1,40 @@
+{
+  "name": "connect-did-sdk",
+  "version": "0.1.0",
+  "description": "An npm package that connects to the Connect DID Authorization Center, enabling any hardware device to become a DID identity authentication device, offering a secure and convenient method of identity verification.",
+  "author": "Leonx.bit <https://github.com/tianxiemaochiyu>",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clear": "rm -rf ./lib/ ./lib.esm/",
+    "build": "npm run clear && npm run build:esm && npm run build:commonjs",
+    "build:commonjs": "tsc -p tsconfig.build.json",
+    "build:esm": "tsc -p tsconfig.build.esm.json",
+    "prepublishOnly": "npm run build"
+  },
+  "main": "lib/index.js",
+  "module": "lib.esm/index.js",
+  "types": "src/index.ts",
+  "publishConfig": {
+    "types": "lib/index.d.ts"
+  },
+  "keywords": [
+    "DID",
+    "Decentralized Identity",
+    "web3",
+    "blockchain",
+    "dotbit",
+    ".bit",
+    "d.id"
+  ],
+  "files": [
+    "lib",
+    "lib.esm"
+  ],
+  "dependencies": {
+    "cbor-web": "^9.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.3"
+  }
+}

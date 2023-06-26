@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "noImplicitAny": false,
+    "removeComments": true,
+    "noLib": false,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "target": "es2018",
+    "sourceMap": true,
+    "allowJs": true,
+    "strictNullChecks": true,
+    "baseUrl": "./",
+    "outDir": "./lib",
+    "paths": {
+      "connect-did": ["src"],
+      "connect-did/*": ["src/*"],
+    },
+    "skipLibCheck": true
+  },
+  "include": [
+    "src",
+    "tests",
+    "types",
+    ".*.js",
+    "*.js",
+    "*.ts",
+    "example",
+    "packages"
+  ],
+  "exclude": [
+    "**/*.spec.ts",
+    "packages/**/lib.esm", // For some unclear reason, they will affect webstorm's type definition. We have to exclude them.
+    "packages/**/lib"
+  ]
+}
