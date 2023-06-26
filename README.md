@@ -1,5 +1,5 @@
 <h1 align="center">Connect-DID SDK</h2>
-<p align="center">An npm package that connects to the Connect DID Authorization Center, enabling any hardware device to become a DID identity authentication device, offering a secure and convenient method of identity verification.</p>
+<p align="center">A Connect DID Authorization Center SDK that allows any hardware device to become a DID identity authentication device, providing a secure and convenient method for identity verification.</p>
 <div align="center">
 
 ![NPM](https://img.shields.io/npm/l/connect-did-sdk) ![npm](https://img.shields.io/npm/v/connect-did-sdk)
