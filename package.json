@@ -1,7 +1,7 @@
 {
   "name": "connect-did-sdk",
   "version": "0.1.0",
-  "description": "An npm package that connects to the Connect DID Authorization Center, enabling any hardware device to become a DID identity authentication device, offering a secure and convenient method of identity verification.",
+  "description": "A Connect DID Authorization Center SDK that allows any hardware device to become a DID identity authentication device, providing a secure and convenient method for identity verification.",
   "author": "Leonx.bit <https://github.com/tianxiemaochiyu>",
   "license": "MIT",
   "scripts": {

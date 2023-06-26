@@ -112,7 +112,7 @@ export class ConnectDID {
     );
   }
 
-  messageHandler(event: MessageEvent) {
+  private messageHandler(event: MessageEvent) {
     if (event.origin === this.tabUrl) {
       if (Object.values(EnumResponseMethods).includes(event.data.method)) {
         return event.data;
@@ -121,7 +121,7 @@ export class ConnectDID {
     return undefined;
   }
 
-  postMessage(
+  private postMessage(
       origin: string,
       params: IRequestParams<any>,
   ): Promise<IData<any>> {
