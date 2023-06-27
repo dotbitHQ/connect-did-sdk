@@ -169,6 +169,7 @@ const result = await connectDID.requestRecoverDeviceData();
 
 #### requestBackupData(data: {ckbAddr: string;isOpen?: boolean;})
 Popup to guide the user in performing multi-device backup.
+Decoding requires the use of the [`deserializedData`](#deserializeddatadata-any-enc-string) method to obtain data of type `{ name: string; ckbAddr: string }`.
 ##### Parameter
 - `isOpen`: `boolean` Whether to directly open the backup operation popup. default `true`. If set to `false`, it will return the URL of the backup page.
 -  `ckbAddr`: `string` CKB address of the old device for the purpose of backup on a new device.
@@ -182,12 +183,18 @@ const url = await tabCaller.requestBackupData({
   isOpen: false,
   ckbAddr: "ckt1qqexmutxu0c2jq9q4msy8cc6fh4q7q02xvr7dc347zw3ks3qka0m6qggqus2789zvyms45khp275rfgz5lvcl09e9yyqwg90rj3xzdc26tts402p55p20kv0hjujjjhadjy",
 });
+
+// the QR code contains the following information：  
+{ 
+  name: string; // usename
+  ckbAddr:string // ckb address
+}
 ```
 
 #### deserializedData(data: any, enc?: string)
 Decode the specified formatted data.
 ##### Parameter
-- `data`: `Buffer`
+- `data`: `string`
 - `enc`: `string` Buffer encoding format. default `'hex'`.
 
 ##### Return Value
