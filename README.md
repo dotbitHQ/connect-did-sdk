@@ -45,7 +45,7 @@ TBD
 
 ## API Documentation
 ### Table of Contents
-- [constructor(isProdData?: boolean)](#constructorisproddata-boolean)
+- [constructor(isTestNet?: boolean)](#constructoristestnet-boolean)
 - [requestNewDeviceData()](#requestnewdevicedata)
 - [requestDeviceData()](#requestdevicedata)
 - [requestSignData(data: {msg: string})](#requestsigndatadata-msg-string)
@@ -53,12 +53,12 @@ TBD
 - [requestBackupData(data: {ckbAddr: string;isOpen?: boolean;})](#requestbackupdatadata-ckbaddr-stringisopen-boolean)
 - [deserializedData(data: any, enc?: string)](#deserializeddatadata-any-enc-string))
 
-#### constructor(isProdData?: boolean)
+#### constructor(isTestNet?: boolean)
 Create an instance of ConectDID SDK.
 ##### Parameter
-- `isProdData`: network type. default `true`.
-  - `true`: Main Net
-  - `false`: Test Net.
+- `isTestNet`: network type. default `false`.
+  - `false`: Main Net
+  - `true`: Test Net.
 ##### Return Value
 ConnectDID instance
 
@@ -169,7 +169,7 @@ const result = await connectDID.requestRecoverDeviceData();
 
 #### requestBackupData(data: {ckbAddr: string;isOpen?: boolean;})
 Popup to guide the user in performing multi-device backup.
-Decoding requires the use of the [`deserializedData`](#deserializeddatadata-any-enc-string) method to obtain data of type `{ name: string; ckbAddr: string }`.
+Decoding requires the use of the [`decodeQRCode`](#decodeqrcodedata-string) method to obtain data of type `{ name: string; ckbAddr: string }`.
 ##### Parameter
 - `isOpen`: `boolean` Whether to directly open the backup operation popup. default `true`. If set to `false`, it will return the URL of the backup page.
 -  `ckbAddr`: `string` CKB address of the old device for the purpose of backup on a new device.
@@ -191,17 +191,40 @@ const url = await tabCaller.requestBackupData({
 }
 ```
 
-#### deserializedData(data: any, enc?: string)
+#### decodeQRCode(data: string)
 Decode the specified formatted data.
 ##### Parameter
 - `data`: `string`
-- `enc`: `string` Buffer encoding format. default `'hex'`.
 
 ##### Return Value
 Decoded data.
 ##### Example
 ```ts
-const result = tabCaller.deserializedData("a4646e616d65724368726f6d652d646f746269742d3036")
+const result = tabCaller.decodeQRCode("a4646e616d65724368726f6d652d646f746269742d3036")
+```
+
+#### ConnectDIDError
+Connect-DID SDK Error
+##### Return Value
+Error Object.
+```ts
+export enum ActionErrorCode {
+  ABORT = 1000,  // user reject
+  NOT_FOUND = 3001, // cid not found
+  NOT_EXIST = 3002, // cid not exist
+  ERROR = 5000, // internal error
+  UNKNOWN = 9999,
+
+  SUCCESS = 2000,
+}
+```
+##### Example
+```ts
+try {
+  const result = tabCaller.decodeQRCode("{a: 232302323}")
+} catch (e) {
+  console.log(e)  //{code: 9999, message: "unknown error"}:
+}
 ```
 
 ## FAQ

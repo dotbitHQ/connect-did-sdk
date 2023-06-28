@@ -5,6 +5,7 @@ export enum ActionErrorCode {
   NOT_FOUND = 3001,
   NOT_EXIST = 3002,
   ERROR = 5000,
+  UNKNOWN = 9999,
 
   SUCCESS = 2000,
 }
@@ -67,6 +68,16 @@ export interface IData<T> {
   data: T;
 }
 
+class ConnectDIDError extends Error{
+  code: number;
+  message: string;
+  constructor(code, message) {
+    super(message);
+    this.code = code;
+    this.message = message
+  }
+}
+
 
 export class ConnectDID {
   private tabUrl: string;
@@ -75,10 +86,10 @@ export class ConnectDID {
 
   private TAB_EVENT = "TabCallBack";
 
-  constructor(isProdData = true) {
-    this.tabUrl = isProdData
-        ? "https://connect.did.id"
-        : "https://test-connect.did.id"
+  constructor(isTestNet = false) {
+    this.tabUrl = isTestNet
+        ? "https://test-connect.did.id"
+        : "https://connect.did.id"
   }
 
   serializedData(data: any) {
@@ -87,6 +98,15 @@ export class ConnectDID {
 
   deserializedData(data: any, enc = "hex") {
     return decode(data, enc);
+  }
+
+  decodeQRCode(str: string) {
+    if (!str) return "";
+    try {
+      return window.atob(str)
+    } catch (e) {
+      throw new ConnectDIDError(ActionErrorCode.UNKNOWN, "unknown error")
+    }
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -103,13 +123,17 @@ export class ConnectDID {
       originUrl: globalThis.location.origin,
     });
 
-    globalThis.open(
-        `${origin}#${hash}`,
-        "",
-        !isNewTab
-            ? `left=${left},top=${top},width=${width},height=${height},location=no`
-            : "",
-    );
+    try {
+      globalThis.open(
+          `${origin}#${hash}`,
+          "",
+          !isNewTab
+              ? `left=${left},top=${top},width=${width},height=${height},location=no`
+              : "",
+      );
+    } catch (e) {
+      throw new ConnectDIDError(ActionErrorCode.UNKNOWN, "unknown error")
+    }
   }
 
   private messageHandler(event: MessageEvent) {
