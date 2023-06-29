@@ -63,7 +63,10 @@ export declare class ConnectDID {
     constructor(isTestNet?: boolean);
     serializedData(data: any): any;
     deserializedData(data: any, enc?: string): any;
-    decodeQRCode(str: string): string;
+    decodeQRCode(str: string): {
+        ckbAddr: string;
+        name: string;
+    };
     private open;
     private messageHandler;
     private postMessage;

@@ -48,9 +48,9 @@ export class ConnectDID {
     }
     decodeQRCode(str) {
         if (!str)
-            return "";
+            return { ckbAddr: "", name: "" };
         try {
-            return window.atob(str);
+            return JSON.parse(window.atob(str));
         }
         catch (e) {
             throw new ConnectDIDError(ActionErrorCode.UNKNOWN, "unknown error");
