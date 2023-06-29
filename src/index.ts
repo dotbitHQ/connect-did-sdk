@@ -100,10 +100,10 @@ export class ConnectDID {
     return decode(data, enc);
   }
 
-  decodeQRCode(str: string) {
-    if (!str) return "";
+  decodeQRCode(str: string): {ckbAddr: string, name: string} {
+    if (!str) return {ckbAddr: "", name: ""};
     try {
-      return window.atob(str)
+      return JSON.parse(window.atob(str))
     } catch (e) {
       throw new ConnectDIDError(ActionErrorCode.UNKNOWN, "unknown error")
     }
