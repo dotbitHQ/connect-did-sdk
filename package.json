@@ -31,6 +31,14 @@
     "lib",
     "lib.esm"
   ],
+  "homepage": "https://github.com/dotbitHQ/connect-did-sdk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dotbitHQ/connect-did-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dotbitHQ/connect-did-sdk/issues"
+  },
   "dependencies": {
     "cbor-web": "^9.0.0"
   },
