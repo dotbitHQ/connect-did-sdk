@@ -14,10 +14,7 @@
   },
   "main": "lib/index.js",
   "module": "lib.esm/index.js",
-  "types": "src/index.ts",
-  "publishConfig": {
-    "types": "lib/index.d.ts"
-  },
+  "types": "lib/index.d.ts",
   "keywords": [
     "DID",
     "Decentralized Identity",

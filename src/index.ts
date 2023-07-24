@@ -94,10 +94,12 @@ export class ConnectDID {
 
   serializedData(data: any) {
     return encode(data).toString("hex");
+    // return globalThis.encodeURIComponent(data)
   }
 
   deserializedData(data: any, enc = "hex") {
     return decode(data, enc);
+    // return globalThis.decodeURIComponent(data)
   }
 
   decodeQRCode(str: string): {ckbAddr: string, name: string} {
@@ -110,7 +112,7 @@ export class ConnectDID {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  private open(origin: string, prams: IRequestParams<any>, isNewTab?: boolean) {
+  private open(origin: string, prams: IRequestParams<any>, isNewTab?: boolean, isEncode = true) {
     const width = 860;
     const height = 780;
 
@@ -118,10 +120,15 @@ export class ConnectDID {
     const left = (globalThis.innerWidth - width) / 2;
     const top = (globalThis.innerHeight - height) / 2;
 
-    const hash = this.serializedData({
+    const hash = isEncode ? this.serializedData({
       ...prams,
       originUrl: globalThis.location.origin,
-    });
+    }) : globalThis.btoa(JSON.stringify(
+        {
+          ...prams,
+          originUrl: globalThis.location.origin,
+        }
+    ))
 
     try {
       globalThis.open(
@@ -210,14 +217,15 @@ export class ConnectDID {
             params: data,
           },
           true,
+          false,
       );
     } else {
-      const hash = this.serializedData({
+      const hash = globalThis.btoa(JSON.stringify({
         method: EnumRequestMethods.REQUEST_BACKUP_DATA,
         isInternal: true,
         params: data,
         originUrl: globalThis.location.origin,
-      });
+      }));
       url = `${this.tabUrl}/backup#${hash}`;
     }
     return url;
