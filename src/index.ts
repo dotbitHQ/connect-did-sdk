@@ -113,8 +113,8 @@ export class ConnectDID {
 
   // eslint-disable-next-line class-methods-use-this
   private open(origin: string, prams: IRequestParams<any>, isNewTab?: boolean, isEncode = true) {
-    const width = 860;
-    const height = 780;
+    const width = 430;
+    const height = globalThis.innerHeight >= 730 ? 730 : globalThis.innerHeight * 0.8;
 
     // 计算居中的位置
     const left = (globalThis.innerWidth - width) / 2;
