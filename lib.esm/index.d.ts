@@ -25,18 +25,21 @@ export interface ICredential {
 }
 export declare enum EnumRequestMethods {
     REQUEST_NEW_DEVICE_DATA = "requestNewDeviceData",
-    REQUEST_CKB_ADDR_LIST = "requestCKBAddrList",
     REQUEST_SIGN_DATA = "requestSignData",
     REQUEST_RECOVER_DEVICE_DATA = "requestRecoverDeviceData",
     REQUEST_DEVICE_DATA = "requestDeviceData",
-    REQUEST_BACKUP_DATA = "requestBackupData"
+    REQUEST_BACKUP_DATA = "requestBackupData",
+    REQUEST_WAITING_PAGE = "requestWaitingPage",
+    REQUEST_REDIRECT_PAGE = "requestRedirectPage",
+    REQUEST_ERROR_PAGE = "requestErrorPage"
 }
 export declare enum EnumResponseMethods {
     RESPONSE_NEW_DEVICE_DATA = "responseNewDeviceData",
-    RESPONSE_CKB_ADDR_LIST = "responseCKBAddrList",
     RESPONSE_SIGN_DATA = "responseSignData",
     RESPONSE_RECOVER_DEVICE_DATA = "responseRecoverDeviceData",
-    RESPONSE_DEVICE_DATA = "responseDeviceData"
+    RESPONSE_DEVICE_DATA = "responseDeviceData",
+    RESPONSE_WAITING_PAGE = "responseWaitingPage",
+    RESPONSE_ERROR_PAGE = "responseErrorPage"
 }
 export interface IRequestParams<T> {
     method: EnumRequestMethods;
@@ -57,9 +60,9 @@ export interface IData<T> {
     data: T;
 }
 export declare class ConnectDID {
-    private tabUrl;
-    private serviceID;
-    private TAB_EVENT;
+    private readonly tabUrl;
+    private readonly serviceID;
+    private readonly TAB_EVENT;
     constructor(isTestNet?: boolean);
     serializedData(data: any): any;
     deserializedData(data: any, enc?: string): any;
@@ -70,6 +73,8 @@ export declare class ConnectDID {
     private open;
     private messageHandler;
     private postMessage;
+    private openPopupWithWaiting;
+    private openPopup;
     requestNewDeviceData(): Promise<IData<IDeviceData>>;
     requestDeviceData(): Promise<IData<IDeviceData>>;
     requestSignData(data: {
@@ -80,4 +85,11 @@ export declare class ConnectDID {
         ckbAddr: string;
         isOpen?: boolean;
     }): string;
+    requestWaitingPage(onError: (error: IData<any>) => void): {
+        onNext: ({ method, params }: {
+            method: EnumRequestMethods;
+            params: any;
+        }) => Promise<IData<any>>;
+        onFails: () => Promise<IData<any>>;
+    };
 }

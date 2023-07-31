@@ -32,19 +32,22 @@ export interface ICredential {
 
 export enum EnumRequestMethods {
   REQUEST_NEW_DEVICE_DATA = "requestNewDeviceData",
-  REQUEST_CKB_ADDR_LIST = "requestCKBAddrList",
   REQUEST_SIGN_DATA = "requestSignData",
   REQUEST_RECOVER_DEVICE_DATA = "requestRecoverDeviceData",
   REQUEST_DEVICE_DATA = "requestDeviceData",
   REQUEST_BACKUP_DATA = "requestBackupData",
+  REQUEST_WAITING_PAGE = "requestWaitingPage",
+  REQUEST_REDIRECT_PAGE = "requestRedirectPage",
+  REQUEST_ERROR_PAGE = "requestErrorPage",
 }
 
 export enum EnumResponseMethods {
   RESPONSE_NEW_DEVICE_DATA = "responseNewDeviceData",
-  RESPONSE_CKB_ADDR_LIST = "responseCKBAddrList",
   RESPONSE_SIGN_DATA = "responseSignData",
   RESPONSE_RECOVER_DEVICE_DATA = "responseRecoverDeviceData",
   RESPONSE_DEVICE_DATA = "responseDeviceData",
+  RESPONSE_WAITING_PAGE = "responseWaitingPage",
+  RESPONSE_ERROR_PAGE = "responseErrorPage",
 }
 
 export interface IRequestParams<T> {
@@ -78,13 +81,23 @@ class ConnectDIDError extends Error{
   }
 }
 
+const pathMap = {
+  "requestNewDeviceData": "create-passkey",
+  "requestSignData": "sign-data",
+  "requestRecoverDeviceData": "recover-passkey",
+  "requestDeviceData": "login",
+  "requestBackupData": "backup",
+  "requestWaitingPage": "waiting",
+  "requestErrorPage": "error",
+}
+
 
 export class ConnectDID {
-  private tabUrl: string;
+  private readonly tabUrl: string;
 
-  private serviceID = "DeviceAuthServiceIframe";
+  private readonly serviceID = "DeviceAuthServiceIframe";
 
-  private TAB_EVENT = "TabCallBack";
+  private readonly TAB_EVENT = "TabCallBack";
 
   constructor(isTestNet = false) {
     this.tabUrl = isTestNet
@@ -112,7 +125,7 @@ export class ConnectDID {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  private open(origin: string, prams: IRequestParams<any>, isNewTab?: boolean, isEncode = true) {
+  private open(origin: string, params: IRequestParams<any>, isNewTab?: boolean, isEncode = true) {
     const width = 430;
     const height = globalThis.innerHeight >= 730 ? 730 : globalThis.innerHeight * 0.8;
 
@@ -121,17 +134,17 @@ export class ConnectDID {
     const top = (globalThis.innerHeight - height) / 2;
 
     const hash = isEncode ? this.serializedData({
-      ...prams,
+      ...params,
       originUrl: globalThis.location.origin,
     }) : globalThis.btoa(JSON.stringify(
         {
-          ...prams,
+          ...params,
           originUrl: globalThis.location.origin,
         }
     ))
 
     try {
-      globalThis.open(
+      return globalThis.open(
           `${origin}#${hash}`,
           "",
           !isNewTab
@@ -152,7 +165,127 @@ export class ConnectDID {
     return undefined;
   }
 
-  private postMessage(
+  private postMessage(opener: Window | null, data: {method: EnumRequestMethods, params: any}) {
+    console.log(opener)
+    opener?.postMessage({
+      method: data.method,
+      params: data.params,
+    }, this.tabUrl)
+  }
+
+  private openPopupWithWaiting(
+      origin: string,
+      params: IRequestParams<any>,
+      onError: (error: IData<any>) => void
+  ) {
+    const onWaitingError = (event: MessageEvent) => {
+      const result = this.messageHandler(event);
+      if (result) {
+        globalThis.removeEventListener("message", onWaitingError);
+        if (result.data.code !== ActionErrorCode.SUCCESS) {
+          popupWindow = null;
+          onError(result.data);
+        }
+      }
+    };
+
+    globalThis.addEventListener("message", onWaitingError);
+    let popupWindow = this.open(origin, params);
+
+    const onNext = ({method, params}: {method: EnumRequestMethods, params: any}) => {
+      if (!popupWindow) {
+        return Promise.reject({
+          code: ActionErrorCode.ERROR,
+          message: "window is undefined",
+          data: {},
+        });
+      }
+      globalThis.removeEventListener("message", onWaitingError);
+      return new Promise(
+          (
+              resolve: (value: IData<any>) => void,
+              reject: (value: IData<any>) => void,
+          ) => {
+            const hash = method !== EnumRequestMethods.REQUEST_BACKUP_DATA ? this.serializedData({
+              method,
+              params,
+              originUrl: globalThis.location.origin,
+            }) : globalThis.btoa(JSON.stringify(
+                {
+                  method,
+                  params,
+                  originUrl: globalThis.location.origin,
+                }
+            ))
+
+            const onResult = (event: MessageEvent) => {
+              const result = this.messageHandler(event);
+              if (result) {
+                globalThis.removeEventListener("message", onResult);
+                if (result.data.code === ActionErrorCode.SUCCESS) {
+                  resolve(result.data);
+                } else {
+                  reject(result.data);
+                }
+              }
+            };
+            globalThis.addEventListener("message", onResult);
+
+            this.postMessage(popupWindow, {
+              method: EnumRequestMethods.REQUEST_REDIRECT_PAGE,
+              params: `${this.tabUrl}/${pathMap[method]}#${hash}`
+            })
+          },
+      );
+    }
+
+    const onFails = () => {
+      globalThis.removeEventListener("message", onWaitingError);
+      if (!popupWindow) {
+        console.log("onNext");
+        return Promise.reject({
+          code: ActionErrorCode.ERROR,
+          message: "window is undefined",
+          data: {},
+        });
+      }
+      return new Promise(
+          (
+              resolve: (value: IData<any>) => void,
+              reject: (value: IData<any>) => void,
+          ) => {
+            const onResult = (event: MessageEvent) => {
+              const result = this.messageHandler(event);
+              if (result) {
+                globalThis.removeEventListener("message", onResult);
+                if (result.data.code !== ActionErrorCode.SUCCESS) {
+                  reject(result.data);
+                }
+              }
+            };
+            globalThis.addEventListener("message", onResult);
+
+            const failedHash = this.serializedData({
+              method: EnumRequestMethods.REQUEST_ERROR_PAGE,
+              internal: true,
+              originUrl: globalThis.location.origin,
+            })
+
+            this.postMessage(popupWindow, {
+              method: EnumRequestMethods.REQUEST_REDIRECT_PAGE,
+              params: `${this.tabUrl}/${pathMap[EnumRequestMethods.REQUEST_ERROR_PAGE]}#${failedHash}`
+            })
+          },
+      );
+    }
+
+    return {
+      onNext,
+      onFails
+    };
+  }
+
+  private openPopup(
       origin: string,
       params: IRequestParams<any>,
   ): Promise<IData<any>> {
@@ -179,28 +312,28 @@ export class ConnectDID {
   }
 
   requestNewDeviceData(): Promise<IData<IDeviceData>> {
-    return this.postMessage(`${this.tabUrl}/create-passkey`, {
+    return this.openPopup(`${this.tabUrl}/${pathMap.requestNewDeviceData}`, {
       method: EnumRequestMethods.REQUEST_NEW_DEVICE_DATA,
       params: {},
     });
   }
 
   requestDeviceData(): Promise<IData<IDeviceData>> {
-    return this.postMessage(`${this.tabUrl}/login`, {
+    return this.openPopup(`${this.tabUrl}/${pathMap.requestDeviceData}`, {
       method: EnumRequestMethods.REQUEST_DEVICE_DATA,
       params: {},
     });
   }
 
   requestSignData(data: { msg: string }): Promise<IData<string>> {
-    return this.postMessage(`${this.tabUrl}/sign-data`, {
+    return this.openPopup(`${this.tabUrl}/${pathMap.requestSignData}`, {
       method: EnumRequestMethods.REQUEST_SIGN_DATA,
       params: data,
     });
   }
 
   requestRecoverDeviceData(): Promise<IData<IDeviceData>> {
-    return this.postMessage(`${this.tabUrl}/recover-passkey`, {
+    return this.openPopup(`${this.tabUrl}/${pathMap.requestRecoverDeviceData}`, {
       method: EnumRequestMethods.REQUEST_RECOVER_DEVICE_DATA,
       params: {},
     });
@@ -210,7 +343,7 @@ export class ConnectDID {
     let url: string = "";
     if (data.isOpen) {
       this.open(
-          `${this.tabUrl}/backup`,
+          `${this.tabUrl}/${pathMap.requestBackupData}`,
           {
             method: EnumRequestMethods.REQUEST_BACKUP_DATA,
             isInternal: true,
@@ -226,8 +359,19 @@ export class ConnectDID {
         params: data,
         originUrl: globalThis.location.origin,
       }));
-      url = `${this.tabUrl}/backup#${hash}`;
+      url = `${this.tabUrl}/${pathMap.requestBackupData}#${hash}`;
     }
     return url;
+  }
+
+  requestWaitingPage(onError: (error: IData<any>) => void) {
+    return this.openPopupWithWaiting(
+      `${this.tabUrl}/${pathMap.requestWaitingPage}`,
+      {
+        method: EnumRequestMethods.REQUEST_WAITING_PAGE,
+        params: {},
+      },
+      onError
+    );
   }
 }
