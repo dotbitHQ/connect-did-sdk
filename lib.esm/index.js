@@ -155,7 +155,7 @@ export class ConnectDID {
                 });
             });
         };
-        const onFails = () => {
+        const onFailed = () => {
             globalThis.removeEventListener("message", onWaitingError);
             if (!popupWindow) {
                 console.log("onNext");
@@ -189,7 +189,7 @@ export class ConnectDID {
         };
         return {
             onNext,
-            onFails
+            onFailed
         };
     }
     openPopup(origin, params) {

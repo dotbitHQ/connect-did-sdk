@@ -90,6 +90,6 @@ export declare class ConnectDID {
             method: EnumRequestMethods;
             params: any;
         }) => Promise<IData<any>>;
-        onFails: () => Promise<IData<any>>;
+        onFailed: () => Promise<IData<any>>;
     };
 }

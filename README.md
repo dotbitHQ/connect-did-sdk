@@ -51,7 +51,8 @@ TBD
 - [requestSignData(data: {msg: string})](#requestsigndatadata-msg-string)
 - [requestRecoverDeviceData()](#requestrecoverdevicedata)
 - [requestBackupData(data: {ckbAddr: string;isOpen?: boolean;})](#requestbackupdatadata-ckbaddr-stringisopen-boolean)
-- [deserializedData(data: any, enc?: string)](#deserializeddatadata-any-enc-string))
+- [decodeQRCode(data: string)](#decodeqrcodedata-string)
+- [requestWaitingPage(onError: (error: IData<any>) => void)](#requestwaitingpageonerror-error-idataany--void)
 
 #### constructor(isTestNet?: boolean)
 Create an instance of ConectDID SDK.
@@ -201,6 +202,36 @@ Decoded data.
 ##### Example
 ```ts
 const result = tabCaller.decodeQRCode("a4646e616d65724368726f6d652d646f746269742d3036")
+```
+
+#### requestWaitingPage(onError: (error: IData<any>) => void)
+A waiting page has emerged. This approach proves valuable in situations where the timing of a delayed pop-up window is crucial, as such delayed pop-ups are often intercepted by web browsers as malicious behavior. This method offers a solution: when a delayed pop-up is necessary, a waiting window is prompted directly, and subsequent redirection of the window is controlled through the provided method.
+##### Parameter
+- `onError`: `(error: IData<any>) => void`, The described function is a void function that takes an error parameter. It is invoked when an error occurs on the waiting page after it appears, and subsequent operations are terminated.
+    * `error`: `IData<any>`,`{code: number, message: string, data: any}` 
+
+##### Return Value
+
+- `onNext`: `({method, params}: {method: EnumRequestMethods, params: any}) => Promise<IData<any>>`, The next page that needs to be redirected to.
+- `onFailed`: `() => Promise<IData<any>>`, Directly redirecting to the failed pop-up page.
+##### Example
+```ts
+const onError = (err: IData<any>) => {
+  console.log(err);
+};
+const result = tabCaller.requestWaitingPage(onError);
+setTimeout(async () => {
+  // const failedData = await result.onFailed();
+  // console.log(failedData);
+
+  const signData = await result.onNext({
+    method: EnumRequestMethods.REQUEST_SIGN_DATA,
+    params: {
+      msg: "e7debaa9009af3acb9c06f77c",
+    }
+  });
+  console.log(signData);
+}, 2000);
 ```
 
 #### ConnectDIDError
