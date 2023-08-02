@@ -85,11 +85,8 @@ export declare class ConnectDID {
         ckbAddr: string;
         isOpen?: boolean;
     }): string;
-    requestWaitingPage(onError: (error: IData<any>) => void): {
-        onNext: ({ method, params }: {
-            method: EnumRequestMethods;
-            params: any;
-        }) => Promise<IData<any>>;
-        onFailed: () => Promise<IData<any>>;
-    };
+    requestWaitingPage(onError: (error: IData<any>) => void): Promise<{
+        onNext: (k: any) => Promise<any>;
+        onFailed: (k: any) => Promise<any>;
+    }>;
 }

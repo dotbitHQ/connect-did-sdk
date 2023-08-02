@@ -81,7 +81,7 @@ export class ConnectDID {
             originUrl: globalThis.location.origin,
         }));
         try {
-            return globalThis.open(`${origin}#${hash}`, "", !isNewTab
+            return globalThis.open(`${origin}#${hash}`, this.serviceID, !isNewTab
                 ? `left=${left},top=${top},width=${width},height=${height},location=no`
                 : "");
         }
@@ -105,92 +105,103 @@ export class ConnectDID {
         }, this.tabUrl);
     }
     openPopupWithWaiting(origin, params, onError) {
-        const onWaitingError = (event) => {
-            const result = this.messageHandler(event);
-            if (result) {
-                globalThis.removeEventListener("message", onWaitingError);
-                if (result.data.code !== ActionErrorCode.SUCCESS) {
-                    popupWindow = null;
-                    onError(result.data);
+        return new Promise((resolveWrapper, rejectWrapper) => {
+            const onWaitingError = (event) => {
+                const result = this.messageHandler(event);
+                if (result) {
+                    globalThis.removeEventListener("message", onWaitingError);
+                    if (result.data.code !== ActionErrorCode.SUCCESS) {
+                        popupWindow = null;
+                        onError(result.data);
+                    }
+                    else {
+                        resolveWrapper({
+                            onNext,
+                            onFailed,
+                        });
+                    }
                 }
-            }
-        };
-        globalThis.addEventListener("message", onWaitingError);
-        let popupWindow = this.open(origin, params);
-        const onNext = ({ method, params }) => {
+            };
+            globalThis.addEventListener("message", onWaitingError);
+            let popupWindow = this.open(origin, params);
             if (!popupWindow) {
-                return Promise.reject({
+                rejectWrapper({
                     code: ActionErrorCode.ERROR,
-                    message: "window is undefined",
+                    msg: "open window is failed",
                     data: {},
                 });
             }
-            globalThis.removeEventListener("message", onWaitingError);
-            return new Promise((resolve, reject) => {
-                const hash = method !== EnumRequestMethods.REQUEST_BACKUP_DATA ? this.serializedData({
-                    method,
-                    params,
-                    originUrl: globalThis.location.origin,
-                }) : globalThis.btoa(JSON.stringify({
-                    method,
-                    params,
-                    originUrl: globalThis.location.origin,
-                }));
-                const onResult = (event) => {
-                    const result = this.messageHandler(event);
-                    if (result) {
-                        globalThis.removeEventListener("message", onResult);
-                        if (result.data.code === ActionErrorCode.SUCCESS) {
-                            resolve(result.data);
-                        }
-                        else {
-                            reject(result.data);
-                        }
+            const onNext = ({ method, params }) => {
+                return new Promise((resolve, reject) => {
+                    if (!popupWindow) {
+                        reject({
+                            code: ActionErrorCode.ERROR,
+                            msg: "window is undefined",
+                            data: {},
+                        });
                     }
-                };
-                globalThis.addEventListener("message", onResult);
-                this.postMessage(popupWindow, {
-                    method: EnumRequestMethods.REQUEST_REDIRECT_PAGE,
-                    params: `${this.tabUrl}/${pathMap[method]}#${hash}`
-                });
-            });
-        };
-        const onFailed = () => {
-            globalThis.removeEventListener("message", onWaitingError);
-            if (!popupWindow) {
-                console.log("onNext");
-                return Promise.reject({
-                    code: ActionErrorCode.ERROR,
-                    message: "window is undefined",
-                    data: {},
-                });
-            }
-            return new Promise((resolve, reject) => {
-                const onResult = (event) => {
-                    const result = this.messageHandler(event);
-                    if (result) {
-                        globalThis.removeEventListener("message", onResult);
-                        if (result.data.code !== ActionErrorCode.SUCCESS) {
-                            reject(result.data);
+                    globalThis.removeEventListener("message", onWaitingError);
+                    const hash = method !== EnumRequestMethods.REQUEST_BACKUP_DATA ? this.serializedData({
+                        method,
+                        params,
+                        originUrl: globalThis.location.origin,
+                    }) : globalThis.btoa(JSON.stringify({
+                        method,
+                        params,
+                        originUrl: globalThis.location.origin,
+                    }));
+                    const onResult = (event) => {
+                        const result = this.messageHandler(event);
+                        if (result) {
+                            globalThis.removeEventListener("message", onResult);
+                            if (result.data.code === ActionErrorCode.SUCCESS) {
+                                resolve(result.data);
+                            }
+                            else {
+                                reject(result.data);
+                            }
                         }
-                    }
-                };
-                globalThis.addEventListener("message", onResult);
-                const failedHash = this.serializedData({
-                    method: EnumRequestMethods.REQUEST_ERROR_PAGE,
-                    internal: true,
-                    originUrl: globalThis.location.origin,
+                    };
+                    globalThis.addEventListener("message", onResult);
+                    this.postMessage(popupWindow, {
+                        method: EnumRequestMethods.REQUEST_REDIRECT_PAGE,
+                        params: `${this.tabUrl}/${pathMap[method]}#${hash}`
+                    });
                 });
-                this.postMessage(popupWindow, {
-                    method: EnumRequestMethods.REQUEST_REDIRECT_PAGE,
-                    params: `${this.tabUrl}/${pathMap[EnumRequestMethods.REQUEST_ERROR_PAGE]}#${failedHash}`
+            };
+            const onFailed = () => {
+                globalThis.removeEventListener("message", onWaitingError);
+                if (!popupWindow) {
+                    console.log("onNext");
+                    return Promise.reject({
+                        code: ActionErrorCode.ERROR,
+                        message: "window is undefined",
+                        data: {},
+                    });
+                }
+                return new Promise((resolve, reject) => {
+                    const onResult = (event) => {
+                        const result = this.messageHandler(event);
+                        if (result) {
+                            globalThis.removeEventListener("message", onResult);
+                            if (result.data.code !== ActionErrorCode.SUCCESS) {
+                                reject(result.data);
+                            }
+                        }
+                    };
+                    globalThis.addEventListener("message", onResult);
+                    const failedHash = this.serializedData({
+                        method: EnumRequestMethods.REQUEST_ERROR_PAGE,
+                        internal: true,
+                        originUrl: globalThis.location.origin,
+                    });
+                    this.postMessage(popupWindow, {
+                        method: EnumRequestMethods.REQUEST_REDIRECT_PAGE,
+                        params: `${this.tabUrl}/${pathMap[EnumRequestMethods.REQUEST_ERROR_PAGE]}#${failedHash}`
+                    });
                 });
-            });
-        };
-        return {
-            onNext,
-            onFailed
-        };
+            };
+        });
     }
     openPopup(origin, params) {
         return new Promise((resolve, reject) => {
