@@ -1,4 +1,11 @@
 import { encode, decode } from "cbor-web";
+export class DeviceAuthError extends Error {
+    constructor(code, message) {
+        super(message);
+        this.code = code;
+        this.message = message;
+    }
+}
 export var ActionErrorCode;
 (function (ActionErrorCode) {
     ActionErrorCode[ActionErrorCode["ABORT"] = 1000] = "ABORT";
@@ -112,7 +119,7 @@ export class ConnectDID {
                     globalThis.removeEventListener("message", onWaitingError);
                     if (result.data.code !== ActionErrorCode.SUCCESS) {
                         popupWindow = null;
-                        onError(result.data);
+                        onError(new DeviceAuthError(result.data.code, result.data.message || result.data.msg));
                     }
                     else {
                         resolveWrapper({

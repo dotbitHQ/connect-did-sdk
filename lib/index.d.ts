@@ -1,3 +1,8 @@
+export declare class DeviceAuthError extends Error {
+    code: number;
+    message: string;
+    constructor(code: number, message: string);
+}
 export declare enum ActionErrorCode {
     ABORT = 1000,
     NOT_FOUND = 3001,
@@ -6,15 +11,15 @@ export declare enum ActionErrorCode {
     UNKNOWN = 9999,
     SUCCESS = 2000
 }
-export interface IPublicKey {
-    x: string;
-    y: string;
-}
 export interface IDeviceData {
     name: string;
     credential: ICredential;
     publicKey: IPublicKey;
     ckbAddr: string;
+}
+export interface IPublicKey {
+    x: string;
+    y: string;
 }
 export interface ICredential {
     authenticatorAttachment: string | null;
@@ -85,7 +90,7 @@ export declare class ConnectDID {
         ckbAddr: string;
         isOpen?: boolean;
     }): string;
-    requestWaitingPage(onError: (error: IData<any>) => void): Promise<{
+    requestWaitingPage(onError: (error: DeviceAuthError) => void): Promise<{
         onNext: (k: any) => Promise<any>;
         onFailed: (k: any) => Promise<any>;
     }>;

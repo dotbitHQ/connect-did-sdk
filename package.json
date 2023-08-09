@@ -1,6 +1,6 @@
 {
   "name": "connect-did-sdk",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A Connect DID Authorization Center SDK that allows any hardware device to become a DID identity authentication device, providing a secure and convenient method for identity verification.",
   "author": "Leonx.bit <https://github.com/tianxiemaochiyu>",
   "license": "MIT",
