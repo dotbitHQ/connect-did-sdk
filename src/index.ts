@@ -1,5 +1,17 @@
 import { encode, decode } from "cbor-web";
 
+export class DeviceAuthError extends Error {
+  code: number;
+
+  message: string;
+
+  constructor(code: number, message: string) {
+    super(message);
+    this.code = code;
+    this.message = message;
+  }
+}
+
 export enum ActionErrorCode {
   ABORT = 1000,
   NOT_FOUND = 3001,
@@ -10,16 +22,16 @@ export enum ActionErrorCode {
   SUCCESS = 2000,
 }
 
-export interface IPublicKey {
-  x: string;
-  y: string;
-}
-
 export interface IDeviceData {
   name: string;
   credential: ICredential;
   publicKey: IPublicKey;
   ckbAddr: string;
+}
+
+export interface IPublicKey {
+  x: string;
+  y: string;
 }
 
 export interface ICredential {
@@ -176,7 +188,7 @@ export class ConnectDID {
   private openPopupWithWaiting(
       origin: string,
       params: IRequestParams<any>,
-      onError: (error: IData<any>) => void
+      onError: (error: DeviceAuthError) => void
   ) {
     return new Promise(
         (
@@ -189,7 +201,7 @@ export class ConnectDID {
               globalThis.removeEventListener("message", onWaitingError);
               if (result.data.code !== ActionErrorCode.SUCCESS) {
                 popupWindow = null;
-                onError(result.data);
+                onError(new DeviceAuthError(result.data.code, result.data.message || result.data.msg));
               } else {
                 resolveWrapper({
                   onNext,
@@ -385,7 +397,7 @@ export class ConnectDID {
     return url;
   }
 
-  requestWaitingPage(onError: (error: IData<any>) => void) {
+  requestWaitingPage(onError: (error: DeviceAuthError) => void) {
     return this.openPopupWithWaiting(
       `${this.tabUrl}/${pathMap.requestWaitingPage}`,
       {
