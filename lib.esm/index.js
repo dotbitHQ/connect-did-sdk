@@ -56,8 +56,8 @@ export class ConnectDID {
         this.serviceID = "DeviceAuthServiceIframe";
         this.TAB_EVENT = "TabCallBack";
         this.tabUrl = isTestNet
-            ? "https://test-connect.did.id"
-            : "https://connect.did.id";
+            ? "https://test-walletbridge.d.id"
+            : "https://walletbridge.d.id";
     }
     serializedData(data) {
         return encode(data).toString("hex");
