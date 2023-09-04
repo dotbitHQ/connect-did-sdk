@@ -34,6 +34,11 @@ export interface IPublicKey {
   y: string;
 }
 
+export interface ISignDeviceData {
+  deviceData: IDeviceData;
+  signData: string;
+}
+
 export interface ICredential {
   authenticatorAttachment: string | null;
   id: string;
@@ -192,7 +197,7 @@ export class ConnectDID {
   ) {
     return new Promise(
         (
-            resolveWrapper: (v: {onNext: (k: any) => Promise<any>, onFailed: (k: any) => Promise<any>}) => void,
+            resolveWrapper: (v: {onNext: (k: any) => Promise<any>, onFailed: (k: any) => Promise<any>, onClose: () => Promise<any>}) => void,
             rejectWrapper: (v: IData<any>) => void,
         ) => {
           const onWaitingError = (event: MessageEvent) => {
@@ -206,6 +211,7 @@ export class ConnectDID {
                 resolveWrapper({
                   onNext,
                   onFailed,
+                  onClose,
                 })
               }
             }
@@ -270,13 +276,27 @@ export class ConnectDID {
             );
           }
 
+          const onClose = () => {
+            globalThis.removeEventListener("message", onWaitingError);
+            if (!popupWindow) {
+              console.log("onClose");
+              return Promise.reject({
+                code: ActionErrorCode.ERROR,
+                msg: "window is undefined",
+                data: {},
+              });
+            }
+            popupWindow.close();
+            return Promise.resolve();
+          }
+
           const onFailed = () => {
             globalThis.removeEventListener("message", onWaitingError);
             if (!popupWindow) {
               console.log("onNext");
               return Promise.reject({
                 code: ActionErrorCode.ERROR,
-                message: "window is undefined",
+                msg: "window is undefined",
                 data: {},
               });
             }
@@ -311,11 +331,6 @@ export class ConnectDID {
           }
         },
     )
-
-    // return {
-    //   onNext,
-    //   onFailed
-    // };
   }
 
   private openPopup(
@@ -362,6 +377,16 @@ export class ConnectDID {
     return this.openPopup(`${this.tabUrl}/${pathMap.requestSignData}`, {
       method: EnumRequestMethods.REQUEST_SIGN_DATA,
       params: data,
+    });
+  }
+
+  requestDeviceSignData(data: {msg: string}): Promise<IData<ISignDeviceData>> {
+    return this.openPopup(`${this.tabUrl}/${pathMap.requestDeviceData}`, {
+      method: EnumRequestMethods.REQUEST_DEVICE_DATA,
+      params: {
+        msg: data.msg,
+        haveDeviceData: true,
+      },
     });
   }
 

@@ -21,6 +21,10 @@ export interface IPublicKey {
     x: string;
     y: string;
 }
+export interface ISignDeviceData {
+    deviceData: IDeviceData;
+    signData: string;
+}
 export interface ICredential {
     authenticatorAttachment: string | null;
     id: string;
@@ -69,7 +73,7 @@ export declare class ConnectDID {
     private readonly serviceID;
     private readonly TAB_EVENT;
     constructor(isTestNet?: boolean);
-    serializedData(data: any): any;
+    serializedData(data: any): string;
     deserializedData(data: any, enc?: string): any;
     decodeQRCode(str: string): {
         ckbAddr: string;
@@ -85,6 +89,9 @@ export declare class ConnectDID {
     requestSignData(data: {
         msg: string;
     }): Promise<IData<string>>;
+    requestDeviceSignData(data: {
+        msg: string;
+    }): Promise<IData<ISignDeviceData>>;
     requestRecoverDeviceData(): Promise<IData<IDeviceData>>;
     requestBackupData(data: {
         ckbAddr: string;
@@ -93,5 +100,6 @@ export declare class ConnectDID {
     requestWaitingPage(onError: (error: DeviceAuthError) => void): Promise<{
         onNext: (k: any) => Promise<any>;
         onFailed: (k: any) => Promise<any>;
+        onClose: () => Promise<any>;
     }>;
 }
