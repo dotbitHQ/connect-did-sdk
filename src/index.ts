@@ -52,6 +52,7 @@ export enum EnumRequestMethods {
   REQUEST_SIGN_DATA = "requestSignData",
   REQUEST_RECOVER_DEVICE_DATA = "requestRecoverDeviceData",
   REQUEST_DEVICE_DATA = "requestDeviceData",
+  REQUEST_DEVICE_SIGN_DATA = "requestDeviceSignData",
   REQUEST_BACKUP_DATA = "requestBackupData",
   REQUEST_WAITING_PAGE = "requestWaitingPage",
   REQUEST_REDIRECT_PAGE = "requestRedirectPage",
@@ -103,6 +104,7 @@ const pathMap = {
   "requestSignData": "sign-data",
   "requestRecoverDeviceData": "recover-passkey",
   "requestDeviceData": "login",
+  "requestDeviceSignData": "login",
   "requestBackupData": "backup",
   "requestWaitingPage": "waiting",
   "requestErrorPage": "error",
@@ -267,7 +269,6 @@ export class ConnectDID {
                     }
                   };
                   globalThis.addEventListener("message", onResult);
-
                   this.postMessage(popupWindow, {
                     method: EnumRequestMethods.REQUEST_REDIRECT_PAGE,
                     params: `${this.tabUrl}/${pathMap[method]}#${hash}`
@@ -381,8 +382,8 @@ export class ConnectDID {
   }
 
   requestDeviceSignData(data: {msg: string}): Promise<IData<ISignDeviceData>> {
-    return this.openPopup(`${this.tabUrl}/${pathMap.requestDeviceData}`, {
-      method: EnumRequestMethods.REQUEST_DEVICE_DATA,
+    return this.openPopup(`${this.tabUrl}/${pathMap.requestDeviceSignData}`, {
+      method: EnumRequestMethods.REQUEST_DEVICE_SIGN_DATA,
       params: {
         msg: data.msg,
         haveDeviceData: true,

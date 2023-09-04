@@ -37,6 +37,7 @@ export declare enum EnumRequestMethods {
     REQUEST_SIGN_DATA = "requestSignData",
     REQUEST_RECOVER_DEVICE_DATA = "requestRecoverDeviceData",
     REQUEST_DEVICE_DATA = "requestDeviceData",
+    REQUEST_DEVICE_SIGN_DATA = "requestDeviceSignData",
     REQUEST_BACKUP_DATA = "requestBackupData",
     REQUEST_WAITING_PAGE = "requestWaitingPage",
     REQUEST_REDIRECT_PAGE = "requestRedirectPage",

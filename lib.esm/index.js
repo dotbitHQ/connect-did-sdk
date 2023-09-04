@@ -21,6 +21,7 @@ export var EnumRequestMethods;
     EnumRequestMethods["REQUEST_SIGN_DATA"] = "requestSignData";
     EnumRequestMethods["REQUEST_RECOVER_DEVICE_DATA"] = "requestRecoverDeviceData";
     EnumRequestMethods["REQUEST_DEVICE_DATA"] = "requestDeviceData";
+    EnumRequestMethods["REQUEST_DEVICE_SIGN_DATA"] = "requestDeviceSignData";
     EnumRequestMethods["REQUEST_BACKUP_DATA"] = "requestBackupData";
     EnumRequestMethods["REQUEST_WAITING_PAGE"] = "requestWaitingPage";
     EnumRequestMethods["REQUEST_REDIRECT_PAGE"] = "requestRedirectPage";
@@ -47,6 +48,7 @@ const pathMap = {
     "requestSignData": "sign-data",
     "requestRecoverDeviceData": "recover-passkey",
     "requestDeviceData": "login",
+    "requestDeviceSignData": "login",
     "requestBackupData": "backup",
     "requestWaitingPage": "waiting",
     "requestErrorPage": "error",
@@ -180,7 +182,7 @@ export class ConnectDID {
             const onClose = () => {
                 globalThis.removeEventListener("message", onWaitingError);
                 if (!popupWindow) {
-                    console.log("onNext");
+                    console.log("onClose");
                     return Promise.reject({
                         code: ActionErrorCode.ERROR,
                         msg: "window is undefined",
@@ -261,8 +263,8 @@ export class ConnectDID {
         });
     }
     requestDeviceSignData(data) {
-        return this.openPopup(`${this.tabUrl}/${pathMap.requestDeviceData}`, {
-            method: EnumRequestMethods.REQUEST_DEVICE_DATA,
+        return this.openPopup(`${this.tabUrl}/${pathMap.requestDeviceSignData}`, {
+            method: EnumRequestMethods.REQUEST_DEVICE_SIGN_DATA,
             params: {
                 msg: data.msg,
                 haveDeviceData: true,
