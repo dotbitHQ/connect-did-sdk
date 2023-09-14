@@ -113,15 +113,18 @@ const pathMap = {
 
 export class ConnectDID {
   private readonly tabUrl: string;
+  private readonly isDebug: boolean;
 
+  private readonly debugFlag = "query=1"
   private readonly serviceID = "DeviceAuthServiceIframe";
 
   private readonly TAB_EVENT = "TabCallBack";
 
-  constructor(isTestNet = false) {
+  constructor(isTestNet = false, isDebug = false) {
     this.tabUrl = isTestNet
         ? "https://test-walletbridge.d.id"
         : "https://walletbridge.d.id"
+    this.isDebug = isDebug
   }
 
   serializedData(data: any) {
@@ -163,8 +166,24 @@ export class ConnectDID {
     ))
 
     try {
+
+      const currentURL = new window.URL(origin)
+
+      if (this.isDebug) {
+        if (currentURL.search) {
+          const searchArray = currentURL.search.slice(1).split("&")
+          searchArray.push(this.debugFlag)
+          currentURL.search = searchArray.join("&")
+        } else {
+          currentURL.search = `?${this.debugFlag}`
+        }
+      }
+      if (this.isDebug) {
+        console.log("debug: ", `${currentURL.href}#${hash}`)
+      }
+
       return globalThis.open(
-          `${origin}#${hash}`,
+          `${currentURL.href}#${hash}`,
           this.serviceID,
           !isNewTab
               ? `left=${left},top=${top},width=${width},height=${height},location=no`

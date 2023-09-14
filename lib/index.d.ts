@@ -71,9 +71,11 @@ export interface IData<T> {
 }
 export declare class ConnectDID {
     private readonly tabUrl;
+    private readonly isDebug;
+    private readonly debugFlag;
     private readonly serviceID;
     private readonly TAB_EVENT;
-    constructor(isTestNet?: boolean);
+    constructor(isTestNet?: boolean, isDebug?: boolean);
     serializedData(data: any): string;
     deserializedData(data: any, enc?: string): any;
     decodeQRCode(str: string): {
