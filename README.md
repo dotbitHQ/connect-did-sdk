@@ -45,7 +45,7 @@ TBD
 
 ## API Documentation
 ### Table of Contents
-- [constructor(isTestNet?: boolean)](#constructoristestnet-boolean)
+- [constructor(isTestNet?: boolean, isDebug?: boolean;)](#constructoristestnet-boolean-isdebug-boolean)
 - [requestNewDeviceData()](#requestnewdevicedata)
 - [requestDeviceData()](#requestdevicedata)
 - [requestSignData(data: {msg: string})](#requestsigndatadata-msg-string)
@@ -54,12 +54,13 @@ TBD
 - [decodeQRCode(data: string)](#decodeqrcodedata-string)
 - [requestWaitingPage(onError: (error: IData<any>) => void)](#requestwaitingpageonerror-error-idata--void)
 
-#### constructor(isTestNet?: boolean)
+#### constructor(isTestNet?: boolean, isDebug?: boolean)
 Create an instance of ConectDID SDK.
 ##### Parameter
 - `isTestNet`: network type. default `false`.
   - `false`: Main Net
   - `true`: Test Net.
+- `isDebug`: debug mode. default `false`.
 ##### Return Value
 ConnectDID instance
 
