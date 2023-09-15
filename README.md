@@ -49,6 +49,7 @@ TBD
 - [requestNewDeviceData()](#requestnewdevicedata)
 - [requestDeviceData()](#requestdevicedata)
 - [requestSignData(data: {msg: string})](#requestsigndatadata-msg-string)
+- [requestDeviceSignData(data: {msg: string})](#requestdevicesigndatadata-msg-string)
 - [requestRecoverDeviceData()](#requestrecoverdevicedata)
 - [requestBackupData(data: {ckbAddr: string;isOpen?: boolean;})](#requestbackupdatadata-ckbaddr-stringisopen-boolean)
 - [decodeQRCode(data: string)](#decodeqrcodedata-string)
@@ -140,6 +141,36 @@ interface IData<string> {
 ##### Example
 ```ts
 const signData = await connectDID.requestSignData({
+  msg: "From .bit: e7343fdebaa9ec5aca009af3acb9c0664c94066f136f4d31b7b325dacf24f77c",
+});
+```
+
+#### requestDeviceSignData(data: {msg: string})
+Popup to open a window for signing a specified string data using the current hardware device authenticator. 
+
+Connection will be established before each signing operation.
+##### Parameter
+- `data`:
+  - `msg`: String to be signed.
+
+##### Return Value
+Signed hexadecimal string.
+```ts
+interface IData<ISignDeviceData> {
+    code: number;
+    msg: string;
+    data: ISignDeviceData;
+}
+
+interface ISignDeviceData {
+  deviceData: IDeviceData;
+  signData: string;
+}
+```
+
+##### Example
+```ts
+const signDeviceData = await connectDID.requestDeviceSignData({
   msg: "From .bit: e7343fdebaa9ec5aca009af3acb9c0664c94066f136f4d31b7b325dacf24f77c",
 });
 ```
