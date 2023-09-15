@@ -215,6 +215,7 @@ A waiting page has emerged. This approach proves valuable in situations where th
 
 - `onNext`: `({method, params}: {method: EnumRequestMethods, params: any}) => Promise<IData<any>>`, The next page that needs to be redirected to.
 - `onFailed`: `() => Promise<IData<any>>`, Directly redirecting to the failed pop-up page.
+- `onClose`: `() => Promise<void>`, Close the current page.
 ##### Example
 ```ts
 const onError = (err: IData<any>) => {
@@ -224,6 +225,9 @@ const result = await tabCaller.requestWaitingPage(onError);
 
 // const failedData = await result.onFailed();
 // console.log(failedData);
+
+// Close the window
+// await result.onClose();
 
 const signData = await result.onNext({
   method: EnumRequestMethods.REQUEST_SIGN_DATA,
