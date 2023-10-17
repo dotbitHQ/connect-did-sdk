@@ -13,6 +13,7 @@ export declare enum ActionErrorCode {
 }
 export interface IDeviceData {
     name: string;
+    device?: string;
     credential: ICredential;
     publicKey: IPublicKey;
     ckbAddr: string;
