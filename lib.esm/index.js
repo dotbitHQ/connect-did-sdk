@@ -1,14 +1,14 @@
 import { encode, decode } from "cbor-web";
-export class DeviceAuthError extends Error {
+export class ConnectDIDError extends Error {
     constructor(code, message) {
         super(message);
         this.code = code;
-        this.message = message;
     }
 }
 export var ActionErrorCode;
 (function (ActionErrorCode) {
     ActionErrorCode[ActionErrorCode["ABORT"] = 1000] = "ABORT";
+    ActionErrorCode[ActionErrorCode["POPUPS_BLOCKED"] = 1001] = "POPUPS_BLOCKED";
     ActionErrorCode[ActionErrorCode["NOT_FOUND"] = 3001] = "NOT_FOUND";
     ActionErrorCode[ActionErrorCode["NOT_EXIST"] = 3002] = "NOT_EXIST";
     ActionErrorCode[ActionErrorCode["ERROR"] = 5000] = "ERROR";
@@ -36,13 +36,6 @@ export var EnumResponseMethods;
     EnumResponseMethods["RESPONSE_WAITING_PAGE"] = "responseWaitingPage";
     EnumResponseMethods["RESPONSE_ERROR_PAGE"] = "responseErrorPage";
 })(EnumResponseMethods || (EnumResponseMethods = {}));
-class ConnectDIDError extends Error {
-    constructor(code, message) {
-        super(message);
-        this.code = code;
-        this.message = message;
-    }
-}
 const pathMap = {
     "requestNewDeviceData": "create-passkey",
     "requestSignData": "sign-data",
@@ -137,7 +130,7 @@ export class ConnectDID {
                     globalThis.removeEventListener("message", onWaitingError);
                     if (result.data.code !== ActionErrorCode.SUCCESS) {
                         popupWindow = null;
-                        onError(new DeviceAuthError(result.data.code, result.data.message || result.data.msg));
+                        onError(new ConnectDIDError(result.data.code, result.data.message || result.data.msg));
                     }
                     else {
                         resolveWrapper({
@@ -152,8 +145,8 @@ export class ConnectDID {
             let popupWindow = this.open(origin, params);
             if (!popupWindow) {
                 rejectWrapper({
-                    code: ActionErrorCode.ERROR,
-                    msg: "open window is failed",
+                    code: ActionErrorCode.POPUPS_BLOCKED,
+                    message: "open window is failed, Popups are blocked.",
                     data: {},
                 });
             }
@@ -162,7 +155,7 @@ export class ConnectDID {
                     if (!popupWindow) {
                         reject({
                             code: ActionErrorCode.ERROR,
-                            msg: "window is undefined",
+                            message: "no associated popups were found.",
                             data: {},
                         });
                     }
@@ -201,7 +194,7 @@ export class ConnectDID {
                     console.log("onClose");
                     return Promise.reject({
                         code: ActionErrorCode.ERROR,
-                        msg: "window is undefined",
+                        message: "no associated popups were found.",
                         data: {},
                     });
                 }
@@ -214,7 +207,7 @@ export class ConnectDID {
                     console.log("onNext");
                     return Promise.reject({
                         code: ActionErrorCode.ERROR,
-                        msg: "window is undefined",
+                        message: "no associated popups were found.",
                         data: {},
                     });
                 }

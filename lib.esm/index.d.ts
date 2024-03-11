@@ -1,10 +1,11 @@
-export declare class DeviceAuthError extends Error {
+export declare class ConnectDIDError extends Error {
     code: number;
     message: string;
     constructor(code: number, message: string);
 }
 export declare enum ActionErrorCode {
     ABORT = 1000,
+    POPUPS_BLOCKED = 1001,
     NOT_FOUND = 3001,
     NOT_EXIST = 3002,
     ERROR = 5000,
@@ -67,7 +68,7 @@ export interface IResponseData<T> {
 }
 export interface IData<T> {
     code: number;
-    msg: string;
+    message: string;
     data: T;
 }
 export declare class ConnectDID {
@@ -77,7 +78,7 @@ export declare class ConnectDID {
     private readonly serviceID;
     private readonly TAB_EVENT;
     constructor(isTestNet?: boolean, isDebug?: boolean);
-    serializedData(data: any): string;
+    serializedData(data: any): any;
     deserializedData(data: any, enc?: string): any;
     decodeQRCode(str: string): {
         ckbAddr: string;
@@ -101,7 +102,7 @@ export declare class ConnectDID {
         ckbAddr: string;
         isOpen?: boolean;
     }): string;
-    requestWaitingPage(onError: (error: DeviceAuthError) => void): Promise<{
+    requestWaitingPage(onError: (error: ConnectDIDError) => void): Promise<{
         onNext: (k: any) => Promise<any>;
         onFailed: (k: any) => Promise<any>;
         onClose: () => Promise<any>;

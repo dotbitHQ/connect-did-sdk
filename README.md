@@ -79,7 +79,7 @@ Device Data
 ```ts
 interface IData<IDeviceData> {
     code: number;
-    msg: string;
+    message: string;
     data: IDeviceData;
 }
 
@@ -105,7 +105,7 @@ Device Data
 ```ts
 interface IData<IDeviceData> {
     code: number;
-    msg: string;
+    message: string;
     data: IDeviceData;
 }
 
@@ -133,7 +133,7 @@ Signed hexadecimal string.
 ```ts
 interface IData<string> {
     code: number;
-    msg: string;
+    message: string;
     data: string;
 }
 ```
@@ -158,7 +158,7 @@ Signed hexadecimal string.
 ```ts
 interface IData<ISignDeviceData> {
     code: number;
-    msg: string;
+    message: string;
     data: ISignDeviceData;
 }
 
@@ -184,7 +184,7 @@ Device Data
 ```ts
 interface IData<IDeviceData> {
     code: number;
-    msg: string;
+    message: string;
     data: IDeviceData;
 }
 
